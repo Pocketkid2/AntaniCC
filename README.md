@@ -1,4 +1,6 @@
 ## AntaniCC Mod for minecraft
+[![Build Status](https://travis-ci.org/admiral0/AntaniCC.svg?branch=master)](https://travis-ci.org/admiral0/AntaniCC)
+![Minecraft Version](https://img.shields.io/badge/minecraft-1.10.2-green.svg)
 
 A mod that links ComputerCraft to Industrialcraft2. It's a mod that I created to increase synergy in a personal 
 IC2 based modpack. I plan to add other mod interactions in the future, but I may never have the time...

@@ -1,51 +1,26 @@
 package it.antani.cc.impl;
 
-import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 import ic2.core.block.wiring.TileEntityElectricBlock;
-import it.antani.cc.AntaniCCMod;
-import it.antani.cc.IC2MethodProvider;
-import net.minecraft.tileentity.TileEntity;
+import it.antani.cc.annotations.AcceptsTileEntity;
+import it.antani.cc.annotations.LuaMethod;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+@AcceptsTileEntity(TileEntityElectricBlock.class)
+public class IC2EnergyImpl {
 
-public class IC2EnergyImpl implements IC2MethodProvider {
-    @Override
-    public List<String> getMethods() {
-        return Arrays.asList(
-                "get_energy",
-                "get_capacity",
-                "get_output"
-        );
+    @LuaMethod("get_energy")
+    public Object[] getEnergy(TileEntityElectricBlock block, IComputerAccess access, ILuaContext context, Object[] args) {
+        return new Object[]{block.energy.getEnergy()};
     }
 
-    @Override
-    public Object[] call(String method, TileEntity tileEntity, Object[] params) throws LuaException {
-        ArrayList<Object> result = new ArrayList<>();
-        TileEntityElectricBlock te;
-        try {
-            te = (TileEntityElectricBlock) tileEntity;
-            switch (method){
-                case "get_energy":
-                    result.add(te.energy.getEnergy());
-                    break;
-                case "get_capacity":
-                    result.add(te.getCapacity());
-                    break;
-                case "get_output":
-                    result.add(te.getOutput());
-                    break;
-            };
-        } catch (Exception e) {
-            AntaniCCMod.logger.error("Error while executing IC2 te code.", e);
-            throw new LuaException("Error interacting with IC2");
-        }
-        return result.toArray();
+    @LuaMethod("get_capacity")
+    public Object[] getCap(TileEntityElectricBlock block, IComputerAccess access, ILuaContext context, Object[] args) {
+        return new Object[]{block.getCapacity()};
     }
 
-    @Override
-    public boolean isAcceptable(TileEntity tileEntity) {
-        return tileEntity instanceof TileEntityElectricBlock;
+    @LuaMethod("get_output")
+    public Object[] getOutput(TileEntityElectricBlock block, IComputerAccess access, ILuaContext context, Object[] args) {
+        return new Object[]{block.getOutput()};
     }
 }

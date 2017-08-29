@@ -2,6 +2,7 @@ package it.antani.cc;
 
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
+import it.antani.cc.annotations.AcceptsTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -22,7 +23,8 @@ public class IndustrialPeripheralProvider implements IPeripheralProvider {
         List<TileEntities> implementations = new ArrayList<>();
         if(te != null){
             for(TileEntities entity : TileEntities.values()){
-                if(entity.type.isInstance(te)){
+                Class<? extends TileEntity> cl = entity.provider.getClass().getAnnotation(AcceptsTileEntity.class).value();
+                if(cl.isInstance(te)){
                     implementations.add(entity);
                 }
             }

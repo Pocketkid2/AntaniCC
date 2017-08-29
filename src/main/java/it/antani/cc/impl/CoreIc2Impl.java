@@ -16,10 +16,10 @@ public class CoreIc2Impl {
         return new Object[] { te.getActive() };
     }
 
-    @LuaMethod("set_active")
+    /*@LuaMethod("set_active")
     public Object[] setActive(TileEntityBlock te, IComputerAccess access, ILuaContext context, Object[] args) throws NoSuchFieldException, IllegalAccessException, LuaException {
         context.issueMainThreadTask(new LuaTileActivator(te, (boolean) args[0]));
         return null;
-    }
+    }*/
 
 }

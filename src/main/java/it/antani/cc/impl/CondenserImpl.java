@@ -9,9 +9,17 @@ import it.antani.cc.annotations.LuaMethod;
 
 import java.lang.reflect.Field;
 
+/**
+ * This tile entity is used by the condenser
+ */
 @AcceptsTileEntity(TileEntityCondenser.class)
 public class CondenserImpl {
 
+    /**
+     * Gets the progress of the operation.
+     *
+     * Returns: *(int, int)* - current progress over maximum progress
+     */
     @LuaMethod("get_progress")
     public Object[] getProgress(TileEntityCondenser te, IComputerAccess access, ILuaContext context, Object[] args) throws NoSuchFieldException, IllegalAccessException {
         Field f1 = TileEntityCondenser.class.getDeclaredField("progress");
@@ -23,11 +31,17 @@ public class CondenserImpl {
         return new Object[] { f1.get(te), f2.get(te) };
     }
 
+    /**
+     * Gets information about the input tank
+     */
     @LuaMethod("get_input_tank")
     public Object[] getInputFluid(TileEntityCondenser te, IComputerAccess access, ILuaContext context, Object[] args) throws NoSuchFieldException, IllegalAccessException {
         return Utils.getFluidInfo(te.getInputTank());
     }
 
+    /**
+     * Gets information about the output tank
+     */
     @LuaMethod("get_output_tank")
     public Object[] getOutput(TileEntityCondenser te, IComputerAccess access, ILuaContext context, Object[] args) throws NoSuchFieldException, IllegalAccessException {
         return Utils.getFluidInfo(te.getOutputTank());

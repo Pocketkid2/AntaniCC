@@ -15,8 +15,8 @@ apply plugin: 'kr.motd.sphinx'
 
 
 version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
+group= "it.antani" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "AntaniCC"
 
 sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
 compileJava {
@@ -28,6 +28,10 @@ repositories {
         name = "ic2"
         url = "http://maven.ic2.player.to/"
     }
+}
+
+sourceSets {
+    doclet
 }
 
 minecraft {
@@ -66,6 +70,8 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+    docletCompile files("${System.getProperty('java.home')}/../lib/tools.jar")
+
 }
 
 processResources
@@ -86,4 +92,22 @@ processResources
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+task docletJar(type: Jar) {
+    from sourceSets.doclet.output
+    baseName 'LuaDoclet'
+
+    dependsOn docletClasses
+}
+
+task generateLuaDocs(type: Javadoc){
+    dependsOn docletJar
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+
+    title = null
+
+    options.doclet = 'it.antani.LuaDocumenter'
+    options.docletpath = [docletJar.archivePath]
 }

@@ -16,6 +16,11 @@ public enum TileEntities {
     KINETIC_STEAM_GENERATOR("Kinetic steam generator", new KineticSteamGeneratorImpl()),
     HEAT_EXCHANGER("Heat Exchanger", new HeatExchangerImpl()),
     HEAT_SOURCE("Heat Source", new HeatSourceImpl()),
+    ELECTRIC_MACHINE("Electric Machine", new GenericElectricMachineImpl()),
+    NUCLEAR_REACTOR("Nuclear reactor", new NuclearReactorImpl()),
+    CORE("IC2 Machine", new CoreIc2Impl()),
+    STEAM_GENERATOR("Steam generator", new SteamGeneratorImpl()),
+    STIRLING_GENERATOR("Stirling Generator", new StirlingGeneratorImpl()),
 
     ;
     public final String label;

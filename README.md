@@ -13,7 +13,11 @@ IC2 based modpack. I plan to add other mod interactions in the future, but I may
    * TileEntitySteamKineticGenerator [IC2]
    * TileEntityKineticGenerator [IC2]
    * TileEntityHeatSourceInventory [IC2]
-   
+   * TileEntityElectricMachine [IC2]
+   * TileEntityNuclearReactorElectric [IC2]
+   * TileEntityBlock [IC2]
+   * TileEntitySteamGenerator [IC2]
+   * TileEntityStirlingGenerator [IC2]
    
 ## Credits
 The original idea is from forhaxed / https://minecraft.curseforge.com/projects/industrial-peripheral

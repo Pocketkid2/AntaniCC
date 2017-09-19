@@ -29,7 +29,9 @@ public class AntaniCCMod
     public void init(FMLInitializationEvent event)
     {
         Items.createItems();
-        Items.registerRenderers();
+        if(event.getSide().isClient()) {
+            Items.registerRenderers();
+        }
 
         logger.info("Registering AntaniCC provider");
         ComputerCraftAPI.registerPeripheralProvider(new IndustrialPeripheralProvider());

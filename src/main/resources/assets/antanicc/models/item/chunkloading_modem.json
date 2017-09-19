@@ -1,0 +1,6 @@
+{
+  "parent": "computercraft:block/advanced_modem_off",
+  "textures": {
+    "front": "antanicc:blocks/chunkloadermodem"
+  }
+}

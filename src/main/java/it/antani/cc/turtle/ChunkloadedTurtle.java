@@ -5,6 +5,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
 import ic2.api.item.IC2Items;
 import it.antani.cc.AntaniCCMod;
+import it.antani.cc.Items;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
@@ -23,16 +24,6 @@ import javax.annotation.Nullable;
 import javax.vecmath.Matrix4f;
 
 public class ChunkloadedTurtle implements ITurtleUpgrade {
-
-    // Annoying to create my own model. Let's use cc modem for now
-    @SideOnly( Side.CLIENT )
-    private  ModelResourceLocation m_leftOffModel = new ModelResourceLocation( "computercraft:advanced_turtle_modem_off_left", "inventory" );
-    @SideOnly( Side.CLIENT )
-    private  ModelResourceLocation m_rightOffModel = new ModelResourceLocation( "computercraft:advanced_turtle_modem_off_right", "inventory" );
-    @SideOnly( Side.CLIENT )
-    private  ModelResourceLocation m_leftOnModel = new ModelResourceLocation( "computercraft:advanced_turtle_modem_on_left", "inventory" );
-    @SideOnly( Side.CLIENT )
-    private  ModelResourceLocation m_rightOnModel = new ModelResourceLocation( "computercraft:advanced_turtle_modem_on_right", "inventory" );
 
     @Nonnull
     @Override
@@ -60,7 +51,7 @@ public class ChunkloadedTurtle implements ITurtleUpgrade {
     @Nullable
     @Override
     public ItemStack getCraftingItem() {
-        return IC2Items.getItem("te", "chunk_loader");
+        return new ItemStack(Items.chunkloadingModem);
     }
 
     @Nullable
@@ -78,31 +69,31 @@ public class ChunkloadedTurtle implements ITurtleUpgrade {
     @Nonnull
     @Override
     public Pair<IBakedModel, Matrix4f> getModel(@Nullable ITurtleAccess turtle, @Nonnull TurtleSide side) {
-        boolean active = false;
-        if( turtle != null )
-        {
-            NBTTagCompound turtleNBT = turtle.getUpgradeNBTData( side );
-            if( turtleNBT.hasKey( "active" ) )
-            {
-                active = turtleNBT.getBoolean( "active" );
-            }
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        ModelManager modelManager = mc.getRenderItem().getItemModelMesher().getModelManager();
-        if( side == TurtleSide.Left )
-        {
-            return Pair.of(
-                    active ? modelManager.getModel( m_leftOnModel ) : modelManager.getModel( m_leftOffModel ),
-                    null
-            );
-        }
-        else
-        {
-            return Pair.of(
-                    active ? modelManager.getModel( m_rightOnModel ) : modelManager.getModel( m_rightOffModel ),
-                    null
-            );
-        }
+        // Honestly, this can be precalculated, but my geometry-fu is weak
+        // and I don't like doing this.
+
+        float xOffset = side == TurtleSide.Left ? -0.70625f : 0.70625f;
+
+        // This will flip the modem
+        float rot = side == TurtleSide.Left ? -1 : 1;
+
+        Matrix4f transform = new Matrix4f(
+                0.0f, 0.0f, 1.0f, -0.5f,
+                0.0F, 1.0f, 0.0f, -0.5f,
+                -1.0f, 0.0f, 0.0f, 0.5f,
+                0.0f, 0.0f, 0.0f, 1.0f
+        );
+
+        IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(new ItemStack(Items.chunkloadingModem));
+
+        transform.mul(new Matrix4f(
+                0.7f * rot, 0.0f, 0.0f, 0.5f + xOffset,
+                0.0f, 0.7f, 0.0f, 0.6f,
+                0.0f, 0.0f, 0.7f * rot, 0.465f,
+                0.0f, 0.0f, 0.0f, 1.0f
+        ), transform);
+
+        return Pair.of(model, transform);
     }
 
     @Override

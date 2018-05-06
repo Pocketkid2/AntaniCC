@@ -3,12 +3,16 @@ package it.antani.cc;
 import dan200.computercraft.api.ComputerCraftAPI;
 import it.antani.cc.turtle.ChunkloadedTurtle;
 import net.minecraft.init.Blocks;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.event.FMLEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,13 +30,12 @@ public class AntaniCCMod
     }
 
     @EventHandler
-    public void init(FMLInitializationEvent event)
+    public void init(FMLPreInitializationEvent event)
     {
         Items.createItems();
-        if(event.getSide().isClient()) {
+        if(event.getSide().equals(Side.CLIENT)){
             Items.registerRenderers();
         }
-
         logger.info("Registering AntaniCC provider");
         ComputerCraftAPI.registerPeripheralProvider(new IndustrialPeripheralProvider());
     }

@@ -36,6 +36,11 @@ public class AntaniCCMod
         if(event.getSide().equals(Side.CLIENT)){
             Items.registerRenderers();
         }
+    }
+    
+    @EventHandler
+    public void recipeLoad(FMLInitializationEvent event){
+        Items.initializeMod();
         logger.info("Registering AntaniCC provider");
         ComputerCraftAPI.registerPeripheralProvider(new IndustrialPeripheralProvider());
     }

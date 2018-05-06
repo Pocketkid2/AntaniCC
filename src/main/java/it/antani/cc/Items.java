@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -19,10 +20,10 @@ public final class Items {
 
     public static void createItems(){
         chunkloadingModem = new ChunkloadingModem();
-        GameRegistry.register(chunkloadingModem);
+        ForgeRegistries.ITEMS.register(chunkloadingModem);
         GameRegistry.addShapelessRecipe(
-                new ItemStack(chunkloadingModem),
-                IC2Items.getItem("te", "chunk_loader"),
+                chunkloadingModem.getRegistryName(),
+                IC2Items.getItem("te", "chunk_loader").getItem().getRegistryName(),
                 PeripheralItemFactory.create( PeripheralType.AdvancedModem, null, 1 )
         );
     }

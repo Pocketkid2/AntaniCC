@@ -87,8 +87,8 @@ public class ChunkloaderPeripheral extends WirelessModemPeripheral {
     private Set<ChunkPos> getChunksAround() {
         HashSet<ChunkPos> chunkList = new HashSet<>();
         ChunkPos currentChunk = new ChunkPos(currentPos);
-        for (int chunkX = currentChunk.chunkXPos - radius; chunkX <= currentChunk.chunkXPos + radius; chunkX++) {
-            for (int chunkZ = currentChunk.chunkZPos - radius; chunkZ <= currentChunk.chunkZPos + radius; chunkZ++) {
+        for (int chunkX = currentChunk.getXStart() - radius; chunkX <= currentChunk.getXStart() + radius; chunkX++) {
+            for (int chunkZ = currentChunk.getZStart() - radius; chunkZ <= currentChunk.getZStart() + radius; chunkZ++) {
                 chunkList.add(new ChunkPos(new BlockPos(chunkX,0, chunkZ)));
             }
         }

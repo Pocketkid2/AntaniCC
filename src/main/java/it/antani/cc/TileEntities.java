@@ -11,8 +11,6 @@ public enum TileEntities {
     ENERGY("Energy Generation", new IC2EnergyImpl()),
     CONDENSER("Condenser", new CondenserImpl()),
     FLUID_REGULATOR("Fluid Regulator", new FluidRegulatorImpl()),
-    FLUID_TANK_MACHINE("Fluid Processor", new FluidTankImpl()),
-    KINETIC_GENERATOR("Kinetic Generator", new KineticGeneratorImpl()),
     KINETIC_STEAM_GENERATOR("Kinetic steam generator", new KineticSteamGeneratorImpl()),
     HEAT_EXCHANGER("Heat Exchanger", new HeatExchangerImpl()),
     HEAT_SOURCE("Heat Source", new HeatSourceImpl()),
@@ -20,7 +18,6 @@ public enum TileEntities {
     NUCLEAR_REACTOR("Nuclear reactor", new NuclearReactorImpl()),
     CORE("IC2 Machine", new CoreIc2Impl()),
     STEAM_GENERATOR("Steam generator", new SteamGeneratorImpl()),
-    STIRLING_GENERATOR("Stirling Generator", new StirlingGeneratorImpl()),
 
     ;
     public final String label;

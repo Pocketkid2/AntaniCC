@@ -12,11 +12,11 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = AntaniCCMod.MODID, version = AntaniCCMod.VERSION, name = "AntaniCC", dependencies = "required-after:ComputerCraft")
+@Mod(modid = AntaniCCMod.MODID, version = AntaniCCMod.VERSION, name = "AntaniCC", dependencies = "required-after:computercraft")
 public class AntaniCCMod
 {
     public static final String MODID = "antanicc";
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "1.3";
     public static final Logger logger = LogManager.getLogger(MODID);
 
     public static AntaniCCMod instance;

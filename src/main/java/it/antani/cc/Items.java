@@ -16,10 +16,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public final class Items {
 
-    public static Item chunkloadingModem;
+    public static Item chunkloadingModem = new ChunkloadingModem();
 
     public static void createItems(){
-        chunkloadingModem = new ChunkloadingModem();
         ForgeRegistries.ITEMS.register(chunkloadingModem);
         GameRegistry.addShapelessRecipe(
                 chunkloadingModem.getRegistryName(),

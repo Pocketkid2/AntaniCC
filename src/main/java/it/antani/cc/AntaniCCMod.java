@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 public class AntaniCCMod
 {
     public static final String MODID = "antanicc";
-    public static final String VERSION = "1.3";
+    public static final String VERSION = "1.3.1";
     public static final Logger logger = LogManager.getLogger(MODID);
 
     public static AntaniCCMod instance;

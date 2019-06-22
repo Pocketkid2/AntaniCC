@@ -5,6 +5,7 @@ import it.antani.cc.turtle.ChunkloadedTurtle;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.config.Config;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLEvent;
@@ -20,8 +21,17 @@ import org.apache.logging.log4j.Logger;
 public class AntaniCCMod
 {
     public static final String MODID = "antanicc";
-    public static final String VERSION = "1.3.1";
+    public static final String VERSION = "1.3.2";
     public static final Logger logger = LogManager.getLogger(MODID);
+
+    @Config(modid = AntaniCCMod.MODID)
+    public static class Configuration {
+        @Config.Comment(
+                {"Disable peripheral",
+                "Useful when in same modpack with plethora"}
+        )
+        public static boolean disablePeripheral = false;
+    }
 
     public static AntaniCCMod instance;
 
@@ -41,8 +51,12 @@ public class AntaniCCMod
     @EventHandler
     public void recipeLoad(FMLInitializationEvent event){
         Items.initializeMod();
-        logger.info("Registering AntaniCC provider");
-        ComputerCraftAPI.registerPeripheralProvider(new IndustrialPeripheralProvider());
+        if(!Configuration.disablePeripheral) {
+            logger.info("Registering AntaniCC provider");
+            ComputerCraftAPI.registerPeripheralProvider(new IndustrialPeripheralProvider());
+        }else{
+            logger.info("Not registering the peripheral provider. Disabled by config.");
+        }
     }
 
     @EventHandler

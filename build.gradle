@@ -14,7 +14,7 @@ apply plugin: 'kr.motd.sphinx'
 //Only edit below this line, the above code adds and enables the nessasary things for Forge to be setup.
 
 
-version = "1.3.1"
+version = "1.3.2"
 group= "it.antani" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "AntaniCC"
 
@@ -28,6 +28,7 @@ repositories {
         name = "ic2"
         url = "http://maven.ic2.player.to/"
     }
+    maven { url 'https://squiddev.cc/maven/' }
 }
 
 sourceSets {
@@ -35,7 +36,7 @@ sourceSets {
 }
 
 minecraft {
-    version = "1.12.2-14.23.3.2655"
+    version = "1.12.2-14.23.5.2838"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -59,7 +60,8 @@ dependencies {
 
     // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
     //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-    compile 'net.industrial-craft:industrialcraft-2:2.8.75-ex112:dev'
+    compile 'net.industrial-craft:industrialcraft-2:2.8.158-ex112:dev'
+    compile "org.squiddev:cc-tweaked-1.12.2:1.83.1"
 
     // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
     // except that these dependencies get remapped to your current MCP mappings

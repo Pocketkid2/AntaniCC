@@ -1,25 +1,18 @@
 package it.antani.cc;
 
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import ic2.api.tile.IEnergyStorage;
-import ic2.core.block.wiring.TileEntityElectricBlock;
 import it.antani.cc.annotations.AcceptsTileEntity;
 import it.antani.cc.annotations.LuaMethod;
-import it.antani.cc.impl.IC2EnergyImpl;
 import net.minecraft.tileentity.TileEntity;
-import org.omg.PortableInterceptor.INACTIVE;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.security.Provider;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class IndustrialPeripheral implements InvocationHandler {
     public static class LuaInvocation {

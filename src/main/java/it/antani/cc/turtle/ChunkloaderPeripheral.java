@@ -1,9 +1,11 @@
 package it.antani.cc.turtle;
 
+import com.mojang.authlib.GameProfile;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import dan200.computercraft.shared.peripheral.modem.WirelessModemPeripheral;
+import dan200.computercraft.shared.peripheral.modem.ModemState;
+import dan200.computercraft.shared.peripheral.modem.wireless.WirelessModemPeripheral;
 import it.antani.cc.AntaniCCMod;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -31,7 +33,7 @@ public class ChunkloaderPeripheral extends WirelessModemPeripheral {
 
 
     ChunkloaderPeripheral(ITurtleAccess turtle) {
-        super(true);
+        super(new ModemState(), true);
     }
 
     @Override
@@ -44,7 +46,8 @@ public class ChunkloaderPeripheral extends WirelessModemPeripheral {
     public void detach(@Nonnull IComputerAccess computer) {
         super.detach(computer);
         logger.info("detached");
-        ForgeChunkManager.releaseTicket(ticket);
+        if(ticket != null)
+            ForgeChunkManager.releaseTicket(ticket);
         attached = false;
     }
 
@@ -59,14 +62,15 @@ public class ChunkloaderPeripheral extends WirelessModemPeripheral {
         }
         currentPos = access.getPosition();
         currentWorld = access.getWorld();
+        GameProfile player = access.getOwningPlayer();
 
         if(ticket == null) {
-            ticket = ForgeChunkManager.requestTicket(AntaniCCMod.instance, access.getWorld(), ForgeChunkManager.Type.NORMAL);
+            ticket = ForgeChunkManager.requestPlayerTicket(AntaniCCMod.instance, player.getName(),  access.getWorld(), ForgeChunkManager.Type.NORMAL);
         }
-        if(ticket.world != access.getWorld()){
+        if(ticket != null && ticket.world != access.getWorld()){
             // Aw shit world changed.
             ForgeChunkManager.releaseTicket(ticket);
-            ticket = ForgeChunkManager.requestTicket(AntaniCCMod.instance, access.getWorld(), ForgeChunkManager.Type.NORMAL);
+            ticket = ForgeChunkManager.requestPlayerTicket(AntaniCCMod.instance, player.getName(), access.getWorld(), ForgeChunkManager.Type.NORMAL);
         }
 
         Set<ChunkPos> chunksAround = getChunksAround();

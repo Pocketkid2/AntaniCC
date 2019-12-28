@@ -1,4 +1,4 @@
-package it.antani.cc.impl;
+package it.antani.cc.impl.ic2;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;

@@ -1,10 +1,7 @@
 package it.antani.cc;
 
-import ic2.core.block.machine.tileentity.TileEntityCondenser;
-import ic2.core.block.machine.tileentity.TileEntityFluidRegulator;
-import ic2.core.block.wiring.TileEntityElectricBlock;
-import it.antani.cc.impl.*;
-import net.minecraft.tileentity.TileEntity;
+import it.antani.cc.impl.ic2.*;
+import it.antani.cc.impl.refinedstorage.ControllerImpl;
 
 public enum TileEntities {
 
@@ -18,6 +15,9 @@ public enum TileEntities {
     NUCLEAR_REACTOR("Nuclear reactor", new NuclearReactorImpl()),
     CORE("IC2 Machine", new CoreIc2Impl()),
     STEAM_GENERATOR("Steam generator", new SteamGeneratorImpl()),
+
+    // Refined Storage
+    REFINED_STORAGE_CONTROLLER("Refined Storage controller", new ControllerImpl()),
 
     ;
     public final String label;

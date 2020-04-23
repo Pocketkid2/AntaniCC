@@ -1,27 +1,27 @@
 buildscript {
     repositories {
-        jcenter()
         maven { url = "http://files.minecraftforge.net/maven" }
+        maven { url = "https://plugins.gradle.org/m2/" }
+        jcenter()
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath group: 'kr.motd.gradle', name: 'sphinx-gradle-plugin', version: '1.0.3.Final'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath "kr.motd.gradle:sphinx-gradle-plugin:2.9.0"
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'kr.motd.sphinx'
+
+apply plugin: 'net.minecraftforge.gradle'
+// apply plugin: 'kr.motd.sphinx'
 //Only edit below this line, the above code adds and enables the nessasary things for Forge to be setup.
 
 
-version = "2.0.0"
+version = "2.1.0"
 group= "it.antani" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "AntaniCC"
 
-sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
 
 repositories {
     maven {
@@ -37,23 +37,59 @@ sourceSets {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2847"
-    runDir = "run"
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not allways work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20171003"
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'snapshot', version: '20171003-1.12'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 dependencies {
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2854'
       
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
@@ -62,8 +98,8 @@ dependencies {
     // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
     //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
     compile 'net.industrial-craft:industrialcraft-2:2.8.170-ex112:dev'
-    compile "org.squiddev:cc-tweaked-1.12.2:1.85.2"
-    provided "refinedstorage:refinedstorage:1.6.15-380"
+    compile "org.squiddev:cc-tweaked-1.12.2:1.86.2"
+    compile "refinedstorage:refinedstorage:1.6.15-380"
 
     // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
     // except that these dependencies get remapped to your current MCP mappings
@@ -82,14 +118,14 @@ processResources
 {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "mcversion", "1.12.2"
 
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
                 
         // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version':project.version, 'mcversion': "1.12.2"
     }
         
     // copy everything else, thats not the mcmod.info
@@ -97,6 +133,8 @@ processResources
         exclude 'mcmod.info'
     }
 }
+
+jar.finalizedBy('reobfJar')
 
 task docletJar(type: Jar) {
     from sourceSets.doclet.output

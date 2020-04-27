@@ -1,15 +1,22 @@
 package it.antani.cc.impl.refinedstorage;
 
 import com.raoulvdberge.refinedstorage.api.storage.IStorageCache;
+import com.raoulvdberge.refinedstorage.api.util.Action;
 import com.raoulvdberge.refinedstorage.api.util.IStackList;
 import com.raoulvdberge.refinedstorage.tile.TileController;
 import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.shared.computer.blocks.TileComputer;
+import dan200.computercraft.shared.computer.blocks.TileComputerBase;
+import dan200.computercraft.shared.turtle.blocks.TileTurtle;
+import dan200.computercraft.shared.util.InventoryUtil;
 import it.antani.cc.annotations.AcceptsTileEntity;
 import it.antani.cc.annotations.LuaMethod;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -54,17 +61,19 @@ public class ControllerImpl {
      *  Expected args passed from the Lua interpreter are:
      *  String itemstackName : itemstack name to transfer
      *  Double numberOfItems : number of items to transfer
-     *  String side : side where to transfer the item (north,south,up,down,est,west)
-     *  @Returns the number of transferred items.
+     *  (Optional)String side : side of the caller computer/turtle where the item needs to be transferred to (north,south,up,down,east,west)
+     *  Last parameter is mandatory for computers (as they lack inventory) but not for turtles, when not specified the current turtle's selected slot is used instead.
+     *  Returns the number of transferred items.
      */
     @LuaMethod("extract_item")
-    public Object[] extractItem(TileController controller, IComputerAccess access, ILuaContext context, Object[] args) {
+    public Object[] extractItem(TileController controller, IComputerAccess access, ILuaContext context, Object[] args) throws LuaException {
+
 
         if (controller.getNetwork() == null)
-            return new Object[]{null, "Error, network not connected"};
+            throw new LuaException("Error, network not connected");
 
-        if(args.length != 3)
-            return new Object[]{null,"Wrong number of arguments, expected arguments are : itemstackname,numberofitems,sideOfOutputInventory"};
+        if (args.length > 3 || args.length < 2)
+            throw new LuaException("Wrong number of arguments, expected arguments are : itemstackname,numberofitems[,sideofoutputinventory]");
 
         // First argument: the itemstack name
         String stackUnlocalizedName;
@@ -76,49 +85,134 @@ public class ControllerImpl {
                     .stream()
                     .filter(itemStack -> itemStack.getUnlocalizedName().equals(stackUnlocalizedName))
                     .findFirst();
-        }
-        else
-            return new Object[]{null,"First parameter must be the itemstack name you need to retrieve"};
+        } else
+            throw new LuaException("First parameter must be the itemstack name you need to retrieve");
 
 
-        if(!stack.isPresent())
-            return new Object[]{null,"No element found for itemstack with name: " +  stackUnlocalizedName};
+        if (!stack.isPresent())
+            throw new LuaException("No element found for itemstack with name: " + stackUnlocalizedName);
 
         // Second argument: the number of items to extract, at least 1 ...
         int numberOfItems = ((Double) args[1]).intValue();
 
-        if(numberOfItems < 0)
-            return new Object[]{null,"Can't transfer a negative number of items."};
+        if (numberOfItems <= 0)
+            throw new LuaException("Can't transfer a negative or zero number of items.");
 
 
         // ... and at most a full stack
         int count = Math.min(numberOfItems, stack.get().getMaxStackSize());
 
-        //Third argument : the side of the controller (north,south,est,up,down,etc..) exposed to the destination inventory
-        EnumFacing facing ;
-        if (args[2] instanceof String) {
+        //Third argument : Side of the computer/turtle (north,south,east,up,down,etc..) where item needs to be transferred
+        EnumFacing facing = null;
+        if (args.length > 2 && args[2] instanceof String) {
             String side = (String) args[2];
             facing = EnumFacing.valueOf(side.toUpperCase());
         }
-        else
-            return new Object[]{null,
-                    "Third parameter must be the side where the item needs to be transferred." +
-                    "Possibile values are: "+
-                    Stream.of(EnumFacing.values()).map(Enum::name).collect( Collectors.joining( "," ) )};
 
 
-        //Check the entity on the specified side
-        TileEntity targetEntity = controller.getNode().getWorld().getTileEntity(controller.getNode().getPosition().offset(facing));
+        for (EnumFacing enumFacing : EnumFacing.values()) {
+            //Let's find the caller entity
+            TileEntity te = controller.getNode().getWorld().getTileEntity(controller.getNode().getPosition().offset(enumFacing));
+            if (te instanceof TileComputerBase) {
+                TileComputerBase tileComputerBase = (TileComputerBase) te;
+
+                if (tileComputerBase.getComputerID() == access.getID()) {
+                    //this is the computer/turtle that called this method
+
+                    if (facing != null) {
+                        //Side has been specified, try to transfer the item to inventory at (north|south|east|west|up|down) of the invoking entity
+
+                        final EnumFacing finalFacing;
+                        //Facing is relative to the turtle/computer, but API uses absolute ones, so we need to convert the first in the second kind
+                        //This is not needed when a vertical facing has been specified (UP|DOWN)
+                        if(facing.getAxis().isHorizontal()) {
+                            EnumFacing tileComputerFacing = tileComputerBase.getDirection();
+                            float entityFacingAngle = tileComputerFacing.getHorizontalAngle(); //Absolute angle from the entity
+                            float relativeSideAngle = facing.getHorizontalAngle(); //Relative angle of the specified side
+                            finalFacing = EnumFacing.fromAngle(entityFacingAngle + relativeSideAngle % 360); //Absolute angle of the specified side
+                        }
+                        else
+                            finalFacing = facing;
+
+                        return transferItemToInventory(stack.get(), count, controller, tileComputerBase, finalFacing);
+                    }
+
+                    else if (tileComputerBase instanceof TileTurtle) {
+                        //so this is a turtle
+                        TileTurtle tileTurtle = (TileTurtle) tileComputerBase;
+
+                        //if side is not specified, try to transfer the item into the selected slot of the turtle, only if there is space available
+                        ItemStack stackInSelectedSlot = tileTurtle.getItemHandler().getStackInSlot(tileTurtle.getAccess().getSelectedSlot());
+
+                        if (!stackInSelectedSlot.isEmpty() && !stackInSelectedSlot.getUnlocalizedName().equals(stack.get().getUnlocalizedName()))
+                            //Can't put stuff in other stuff's slot, abort
+                            throw new LuaException("Can't transfer item " + stackUnlocalizedName + " in slot " + tileTurtle.getAccess().getSelectedSlot() + " : already occupied by " + stackInSelectedSlot.getUnlocalizedName());
+
+                        if(stackInSelectedSlot.getCount() == stackInSelectedSlot.getMaxStackSize())
+                            throw new LuaException("Can't transfer item " + stackUnlocalizedName + " in slot " + tileTurtle.getAccess().getSelectedSlot() + " : slot is already full.");
+
+
+                        int transferableAmount = Math.min(count,stackInSelectedSlot.getMaxStackSize() - stackInSelectedSlot.getCount());
+
+                        if (transferableAmount > 0) {
+                            ItemStack extracted = Objects.requireNonNull(controller.getNode().getNetwork()).extractItem(stack.get(), transferableAmount, Action.PERFORM);
+                            assert extracted != null;
+                            InventoryUtil.storeItems(extracted, tileTurtle.getItemHandler(), tileTurtle.getAccess().getSelectedSlot());
+                        }
+                        else{
+                            throw new LuaException("Can't transfer item " + stackUnlocalizedName + " in slot " + tileTurtle.getAccess().getSelectedSlot());
+                        }
+
+                    } else if (tileComputerBase instanceof TileComputer) {
+                        //Computers can try to transfer items in adjacent inventories ONLY if the side is specified
+                        throw new LuaException("Computers do not have inventory, you must specify a side of the computer whose is facing an inventory as third parameter. Possibile values are: " +
+                                Stream.of(EnumFacing.values()).map(Enum::name).collect(Collectors.joining(",")));
+                    }
+                }
+            }
+        }
+
+        return new Object[]{0};
+    }
+
+    /**
+      Transfers item of specified amount through the use of the ItemHandlerHelper API
+      Returns an Object array containing the number of successful transferred items
+     */
+   private Object[] transferItemToInventory(ItemStack itemStack, int amount, TileController controller, TileEntity tileEntity, EnumFacing facing) throws LuaException {
+
+        BlockPos tileEntityPos = tileEntity.getPos();
+        BlockPos targetEntityPos = tileEntityPos.offset(facing.getAxis().isHorizontal()? facing.getOpposite():facing);
+
+        TileEntity targetEntity = tileEntity.getWorld().getTileEntity(targetEntityPos);
+
         if(targetEntity == null || !targetEntity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite()))
-            return new Object[]{null,"No inventory on the given side"};
+            throw new LuaException("No inventory on the given side");
 
+        IItemHandler handler = targetEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+
+        int transferableAmount = numberOfSimulatedTransferredItems(itemStack,amount,handler,controller);
+
+        if(transferableAmount > 0 ){
+            ItemStack extracted = Objects.requireNonNull(controller.getNode().getNetwork()).extractItem(itemStack, transferableAmount, Action.PERFORM);
+            assert extracted != null;
+            ItemHandlerHelper.insertItemStacked(handler, extracted, false);
+        }
+        return new Object[] { transferableAmount };
+    }
+
+    /**
+      Simulates transfer of items through the use of the ItemHandlerHelper API
+      Returns the maximum number of items that could be transferred with the simulation
+     */
+    private int numberOfSimulatedTransferredItems(ItemStack stack, int count, IItemHandler handler, TileController controller){
 
         //Simulate an extraction of the itemstack
-        IItemHandler handler = targetEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
-        ItemStack extractedSim = Objects.requireNonNull(controller.getNode().getNetwork()).extractItem(stack.get(), count,null);
-        if (extractedSim == null || extractedSim.getCount() == 0)
-            return new Object[]{null,"Could not extract the specified item. Does it exist?"};
+        ItemStack extractedSim = Objects.requireNonNull(controller.getNode().getNetwork()).extractItem(stack, count,Action.SIMULATE);
 
+        //If the simulation fails and the item cannot be extracted from the network, stop here
+        if (extractedSim == null || extractedSim.getCount() == 0)
+            return 0;
 
         int transferableAmount = extractedSim.getCount();
 
@@ -128,19 +222,7 @@ public class ControllerImpl {
         if (insertedSim.getCount()>0 )
             transferableAmount -= insertedSim.getCount();
 
-        //If the sum of both extraction and insertion bring us to a negative value, then the transfer cannot be done and thus must end here
-        if (transferableAmount <= 0)
-            return new Object[] { 0 };
+        return Math.max(transferableAmount, 0);
 
-        //The actual transfer
-
-        ItemStack extracted = controller.getNode().getNetwork().extractItem(stack.get(), transferableAmount, null);
-        assert extracted != null;
-        //Put the itemstack in the destination inventory
-        ItemHandlerHelper.insertItemStacked(handler, extracted, false);
-        //Remove the itemstack of specified quantity from the network as it has been transferred
-        controller.getNode().getItemStorageCache().getList().remove(stack.get(),transferableAmount);
-
-        return new Object[] { transferableAmount };
     }
 }

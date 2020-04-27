@@ -20,6 +20,9 @@ public class IndustrialPeripheralProvider implements IPeripheralProvider {
     @Override
     public IPeripheral getPeripheral(@Nonnull World world, @Nonnull BlockPos blockPos, @Nonnull EnumFacing enumFacing) {
         TileEntity te = world.getTileEntity(blockPos);
+        IndustrialPeripheralContext context = new IndustrialPeripheralContext(world, blockPos, enumFacing, te);
+
+
         List<TileEntities> implementations = new ArrayList<>();
         if(te != null){
             for(TileEntities entity : TileEntities.values()){
@@ -29,7 +32,7 @@ public class IndustrialPeripheralProvider implements IPeripheralProvider {
                 }
             }
             if(implementations.size() > 0){
-                return IndustrialPeripheral.buildPeripheral(te, implementations);
+                return IndustrialPeripheral.buildPeripheral(context, implementations);
             }
         }
         return null;

@@ -30,13 +30,13 @@ public class IndustrialPeripheral implements InvocationHandler {
         }
     }
 
-    private TileEntity te;
+    private IndustrialPeripheralContext context;
     private Map<String, LuaInvocation> index;
     private String[] method_index;
     private String[] attribute_index;
 
-    private IndustrialPeripheral(TileEntity entity, List<TileEntities> impl) {
-        this.te = entity;
+    private IndustrialPeripheral(IndustrialPeripheralContext ctx, List<TileEntities> impl) {
+        this.context = ctx;
         index = new LinkedHashMap<>();
         List<String> attribute_index_builder = new ArrayList<>();
         List<String> method_index_builder = new ArrayList<>();
@@ -63,7 +63,7 @@ public class IndustrialPeripheral implements InvocationHandler {
 
         switch (method.getName()){
             case "getTileEntity":
-                return te;
+                return context.getTileEntity();
             case "equals":
                 assert args.length == 1;
                 return this.peripheralEquals((IndustrialPeripheralApi) proxy, (IPeripheral) args[0]);
@@ -92,7 +92,7 @@ public class IndustrialPeripheral implements InvocationHandler {
         try {
         return    (Object[]) invocation.method.invoke(
                     invocation.obj,
-                    invocation.tileEntityType.cast(te),
+                    IndustrialPeripheralContext.forTileEntity(context, invocation.tileEntityType),
                     iComputerAccess,
                     iLuaContext,
                     args
@@ -112,11 +112,11 @@ public class IndustrialPeripheral implements InvocationHandler {
         return other.getTileEntity().equals(self.getTileEntity());
     }
 
-    static IPeripheral buildPeripheral(TileEntity te, List<TileEntities> implementations){
+    static IPeripheral buildPeripheral(IndustrialPeripheralContext ctx, List<TileEntities> implementations){
         return (IndustrialPeripheralApi) Proxy.newProxyInstance(
                 IndustrialPeripheral.class.getClassLoader(),
                 new Class[] { IndustrialPeripheralApi.class },
-                new IndustrialPeripheral(te, implementations)
+                new IndustrialPeripheral(ctx, implementations)
         );
     }
 }

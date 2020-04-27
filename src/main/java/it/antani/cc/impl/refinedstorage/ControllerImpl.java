@@ -11,6 +11,7 @@ import dan200.computercraft.shared.computer.blocks.TileComputer;
 import dan200.computercraft.shared.computer.blocks.TileComputerBase;
 import dan200.computercraft.shared.turtle.blocks.TileTurtle;
 import dan200.computercraft.shared.util.InventoryUtil;
+import it.antani.cc.IndustrialPeripheralContext;
 import it.antani.cc.annotations.AcceptsTileEntity;
 import it.antani.cc.annotations.LuaMethod;
 import net.minecraft.item.ItemStack;
@@ -40,8 +41,8 @@ public class ControllerImpl {
      * Returns a table with stack - quantity
      */
     @LuaMethod("list_items")
-    public Object[] listItems(TileController controller, IComputerAccess access, ILuaContext context, Object[] args){
-        IStorageCache<ItemStack> cache = controller.getItemStorageCache();
+    public Object[] listItems(IndustrialPeripheralContext<TileController> ctx, IComputerAccess access, ILuaContext context, Object[] args){
+        IStorageCache<ItemStack> cache = ctx.getTileEntity().getItemStorageCache();
         IStackList<ItemStack> list = cache.getList();
         Map<String, Integer> all_items = new HashMap<>();
         for(ItemStack stack: list.getStacks()){
@@ -66,9 +67,9 @@ public class ControllerImpl {
      *  Returns the number of transferred items.
      */
     @LuaMethod("extract_item")
-    public Object[] extractItem(TileController controller, IComputerAccess access, ILuaContext context, Object[] args) throws LuaException {
+    public Object[] extractItem(IndustrialPeripheralContext<TileController> ctx, IComputerAccess access, ILuaContext context, Object[] args) throws LuaException {
 
-
+        TileController controller = ctx.getTileEntity();
         if (controller.getNetwork() == null)
             throw new LuaException("Error, network not connected");
 

@@ -3,6 +3,7 @@ package it.antani.cc.impl.ic2;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import ic2.core.block.wiring.TileEntityElectricBlock;
+import it.antani.cc.IndustrialPeripheralContext;
 import it.antani.cc.annotations.AcceptsTileEntity;
 import it.antani.cc.annotations.LuaMethod;
 
@@ -10,17 +11,17 @@ import it.antani.cc.annotations.LuaMethod;
 public class IC2EnergyImpl {
 
     @LuaMethod("get_energy")
-    public Object[] getEnergy(TileEntityElectricBlock block, IComputerAccess access, ILuaContext context, Object[] args) {
-        return new Object[]{block.energy.getEnergy()};
+    public Object[] getEnergy(IndustrialPeripheralContext<TileEntityElectricBlock> ctx, IComputerAccess access, ILuaContext context, Object[] args) {
+        return new Object[]{ctx.getTileEntity().energy.getEnergy()};
     }
 
     @LuaMethod("get_capacity")
-    public Object[] getCap(TileEntityElectricBlock block, IComputerAccess access, ILuaContext context, Object[] args) {
-        return new Object[]{block.getCapacity()};
+    public Object[] getCap(IndustrialPeripheralContext<TileEntityElectricBlock> ctx, IComputerAccess access, ILuaContext context, Object[] args) {
+        return new Object[]{ctx.getTileEntity().getCapacity()};
     }
 
     @LuaMethod("get_output")
-    public Object[] getOutput(TileEntityElectricBlock block, IComputerAccess access, ILuaContext context, Object[] args) {
-        return new Object[]{block.getOutput()};
+    public Object[] getOutput(IndustrialPeripheralContext<TileEntityElectricBlock> ctx, IComputerAccess access, ILuaContext context, Object[] args) {
+        return new Object[]{ctx.getTileEntity().getOutput()};
     }
 }

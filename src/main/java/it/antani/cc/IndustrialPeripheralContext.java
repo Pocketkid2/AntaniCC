@@ -15,7 +15,7 @@ public class IndustrialPeripheralContext<T> {
     public IndustrialPeripheralContext(World world, BlockPos peripheralPosition, EnumFacing peripheralFacing, T tileEntity) {
         this.world = world;
         this.peripheralPosition = peripheralPosition;
-        this.selfPosition = peripheralPosition.offset(peripheralFacing.getOpposite());
+        this.selfPosition = peripheralPosition.offset(peripheralFacing);
         this.peripheralFacing = peripheralFacing;
         this.tileEntity = tileEntity;
     }

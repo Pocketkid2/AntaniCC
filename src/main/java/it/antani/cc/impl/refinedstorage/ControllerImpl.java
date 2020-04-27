@@ -110,10 +110,8 @@ public class ControllerImpl {
             facing = EnumFacing.valueOf(side.toUpperCase());
         }
 
-
-        for (EnumFacing enumFacing : EnumFacing.values()) {
-            //Let's find the caller entity
-            TileEntity te = controller.getNode().getWorld().getTileEntity(controller.getNode().getPosition().offset(enumFacing));
+        //Find out the caller entity
+        TileEntity te = ctx.getWorld().getTileEntity(ctx.getSelfPosition());
             if (te instanceof TileComputerBase) {
                 TileComputerBase tileComputerBase = (TileComputerBase) te;
 
@@ -135,7 +133,7 @@ public class ControllerImpl {
                         else
                             finalFacing = facing;
 
-                        return transferItemToInventory(stack.get(), count, controller, tileComputerBase, finalFacing);
+                        return transferItemToInventory(stack.get(), count, controller, tileComputerBase, finalFacing,facing.getName());
                     }
 
                     else if (tileComputerBase instanceof TileTurtle) {
@@ -171,7 +169,7 @@ public class ControllerImpl {
                     }
                 }
             }
-        }
+
 
         return new Object[]{0};
     }
@@ -180,7 +178,7 @@ public class ControllerImpl {
       Transfers item of specified amount through the use of the ItemHandlerHelper API
       Returns an Object array containing the number of successful transferred items
      */
-   private Object[] transferItemToInventory(ItemStack itemStack, int amount, TileController controller, TileEntity tileEntity, EnumFacing facing) throws LuaException {
+   private Object[] transferItemToInventory(ItemStack itemStack, int amount, TileController controller, TileEntity tileEntity, EnumFacing facing, String sideName) throws LuaException {
 
         BlockPos tileEntityPos = tileEntity.getPos();
         BlockPos targetEntityPos = tileEntityPos.offset(facing.getAxis().isHorizontal()? facing.getOpposite():facing);
@@ -188,7 +186,7 @@ public class ControllerImpl {
         TileEntity targetEntity = tileEntity.getWorld().getTileEntity(targetEntityPos);
 
         if(targetEntity == null || !targetEntity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite()))
-            throw new LuaException("No inventory on the given side");
+            throw new LuaException("No inventory found on side: \"" + sideName+"\"");
 
         IItemHandler handler = targetEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
 

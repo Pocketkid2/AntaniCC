@@ -1,6 +1,7 @@
 package it.antani.cc;
 
 import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import it.antani.cc.annotations.AcceptsTileEntity;
@@ -10,8 +11,10 @@ import net.minecraft.tileentity.TileEntity;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
 
 public class IndustrialPeripheral implements InvocationHandler {
@@ -86,13 +89,20 @@ public class IndustrialPeripheral implements InvocationHandler {
             return attribute_index;
         }
         LuaInvocation invocation = index.get(method_index[method]);
-        return (Object[]) invocation.method.invoke(
-                invocation.obj,
-                invocation.tileEntityType.cast(te),
-                iComputerAccess,
-                iLuaContext,
-                args
-        );
+        try {
+        return    (Object[]) invocation.method.invoke(
+                    invocation.obj,
+                    invocation.tileEntityType.cast(te),
+                    iComputerAccess,
+                    iLuaContext,
+                    args
+            );
+        } catch (InvocationTargetException e){
+            if(e.getTargetException() instanceof LuaException)
+                throw e.getTargetException();
+            else
+                throw new LuaException(e.getTargetException().getMessage());
+        }
     }
 
     private boolean peripheralEquals(@Nonnull IndustrialPeripheralApi self, @Nullable IPeripheral iPeripheral) {

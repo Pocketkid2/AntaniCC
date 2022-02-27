@@ -1,7 +1,6 @@
 package it.antani.cc;
 
 import it.antani.cc.impl.ic2.*;
-import it.antani.cc.impl.refinedstorage.ControllerImpl;
 
 public enum TileEntities {
 
@@ -13,11 +12,9 @@ public enum TileEntities {
     HEAT_SOURCE("Heat Source", new HeatSourceImpl()),
     ELECTRIC_MACHINE("Electric Machine", new GenericElectricMachineImpl()),
     NUCLEAR_REACTOR("Nuclear reactor", new NuclearReactorImpl()),
+    REACTOR_CHAMBER("Reactor chamber", new NuclearReactorChamberImpl()),
     CORE("IC2 Machine", new CoreIc2Impl()),
     STEAM_GENERATOR("Steam generator", new SteamGeneratorImpl()),
-
-    // Refined Storage
-    REFINED_STORAGE_CONTROLLER("Refined Storage controller", new ControllerImpl()),
 
     ;
     public final String label;

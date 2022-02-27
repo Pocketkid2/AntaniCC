@@ -17,7 +17,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = AntaniCCMod.MODID, version = AntaniCCMod.VERSION, name = "AntaniCC", dependencies = "required-after:computercraft;required-after:ic2;required-after:refinedstorage")
+@Mod(modid = AntaniCCMod.MODID, version = AntaniCCMod.VERSION, name = "AntaniCC", dependencies = "required-after:computercraft;required-after:ic2")
 public class AntaniCCMod
 {
     public static final String MODID = "antanicc";
